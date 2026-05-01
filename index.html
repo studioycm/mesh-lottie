@@ -125,27 +125,30 @@
 
         // Function to bind GSAP once any animation loads
         function initGSAPScroll(animInstance) {
-            // Force drawing of the first frame immediately so it starts fully visible
-            animInstance.goToAndStop(0, true);
+
+            // Frame where the intro ends and the Lottie is fully visible in the sweet spot
+            // (Based on your original ACF data-lottie-pause="63")
+            const sweetSpotFrame = 30;
+            const endFrame = animInstance.totalFrames - 0;
+
+            // Immediately set the animation to the fully visible sweet spot on load
+            animInstance.goToAndStop(sweetSpotFrame, true);
 
             ScrollTrigger.create({
                 trigger: "#hero-section",
                 start: "150px top",       // Trigger disappearing when top of viewport is 300px down the section
-                end: "bottom-=150px top", // Trigger reverse when top of viewport scrolls up to 300px from the bottom
+                end: "400px bottom", // Trigger reverse when top of viewport scrolls up to 300px from the bottom
                 onEnter: () => {
-                    // Play the animation forward natively (disappearing animation)
-                    animInstance.setDirection(1);
-                    animInstance.play();
+                    // Play ONLY the disappearing segment (sweet spot -> end)
+                    animInstance.playSegments([sweetSpotFrame, endFrame], true);
                 },
                 onEnterBack: () => {
-                    // Play the animation backwards smoothly when scrolling back up into the section from below
-                    animInstance.setDirection(-1);
-                    animInstance.play();
+                    // Play the disappearing segment backwards to reappear smoothly (end -> sweet spot)
+                    animInstance.playSegments([endFrame, sweetSpotFrame], true);
                 },
                 onLeaveBack: () => {
-                    // Also reset/reverse the animation if you scroll back up before reaching the end trigger
-                    animInstance.setDirection(-1);
-                    animInstance.play();
+                    // Lock it securely at the sweet spot if scrolled entirely above the trigger
+                    // animInstance.playSegments([endFrame, sweetSpotFrame], true);
                 }
             });
         }
