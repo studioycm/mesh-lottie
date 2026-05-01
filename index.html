@@ -125,30 +125,27 @@
 
         // Function to bind GSAP once any animation loads
         function initGSAPScroll(animInstance) {
-
-            // Frame where the intro ends and the Lottie is fully visible in the sweet spot
-            // (Based on your original ACF data-lottie-pause="63")
-            const sweetSpotFrame = 63;
-            const endFrame = animInstance.totalFrames - 1;
-
-            // Immediately set the animation to the fully visible sweet spot on load
-            animInstance.goToAndStop(sweetSpotFrame, true);
+            // Force drawing of the first frame immediately so it starts fully visible
+            animInstance.goToAndStop(0, true);
 
             ScrollTrigger.create({
                 trigger: "#hero-section",
-                start: "300px top",       // Trigger disappearing when top of viewport is 300px down the section
-                end: "bottom-=300px top", // Trigger reverse when top of viewport scrolls up to 300px from the bottom
+                start: "150px top",       // Trigger disappearing when top of viewport is 300px down the section
+                end: "bottom-=150px top", // Trigger reverse when top of viewport scrolls up to 300px from the bottom
                 onEnter: () => {
-                    // Play ONLY the disappearing segment (sweet spot -> end)
-                    animInstance.playSegments([sweetSpotFrame, endFrame], true);
+                    // Play the animation forward natively (disappearing animation)
+                    animInstance.setDirection(1);
+                    animInstance.play();
                 },
                 onEnterBack: () => {
-                    // Play the disappearing segment backwards to reappear smoothly (end -> sweet spot)
-                    animInstance.playSegments([endFrame, sweetSpotFrame], true);
+                    // Play the animation backwards smoothly when scrolling back up into the section from below
+                    animInstance.setDirection(-1);
+                    animInstance.play();
                 },
                 onLeaveBack: () => {
-                    // Lock it securely at the sweet spot if scrolled entirely above the trigger
-                    animInstance.goToAndStop(sweetSpotFrame, true);
+                    // Also reset/reverse the animation if you scroll back up before reaching the end trigger
+                    animInstance.setDirection(-1);
+                    animInstance.play();
                 }
             });
         }
@@ -156,7 +153,7 @@
         // Attempt to load YOUR animation natively
         let lottieAnim = lottie.loadAnimation({
             container: lottieContainer,
-            renderer: 'canvas', // <--- OPTIMIZATION: Fixed to Canvas for better iOS/Safari performance
+            renderer: 'svg', // <--- OPTIMIZATION: Fixed to Canvas for better iOS/Safari performance
             loop: false,
             autoplay: false,
             path: targetUrl
