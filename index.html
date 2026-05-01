@@ -127,17 +127,16 @@
         function initGSAPScroll(animInstance) {
 
             // Frame where the intro ends and the Lottie is fully visible in the sweet spot
-            // (Based on your original ACF data-lottie-pause="63")
             const sweetSpotFrame = 28;
-            const endFrame = animInstance.totalFrames;
+            const endFrame = animInstance.totalFrames - 1;
 
-            // Immediately set the animation to the fully visible sweet spot on load
-            animInstance.goToAndStop(sweetSpotFrame, true);
+            // Play the intro animation from 0 to 28 on page load
+            animInstance.playSegments([0, sweetSpotFrame], true);
 
             ScrollTrigger.create({
                 trigger: "#hero-section",
-                start: "150px top",       // Trigger disappearing when top of viewport is 300px down the section
-                end: "bottom top+=300px", // Trigger reverse when top of viewport scrolls up to 300px from the bottom
+                start: "150px top",       // Trigger disappearing when top of viewport is 150px down the section
+                end: "400px bottom",      // Trigger reverse when top of viewport scrolls up
                 onEnter: () => {
                     // Play ONLY the disappearing segment (sweet spot -> end)
                     animInstance.playSegments([sweetSpotFrame, endFrame], true);
@@ -147,13 +146,12 @@
                     animInstance.playSegments([endFrame, sweetSpotFrame], true);
                 },
                 onLeaveBack: () => {
-                    // Lock it securely at the sweet spot if scrolled entirely above the trigger
-                    // animInstance.goToAndStop(sweetSpotFrame, true);
-                    animInstance.playSegments([endFrame, sweetSpotFrame], true);
+                    // Lock it securely at the sweet spot if scrolled entirely above the trigger.
+                    // This prevents it from accidentally playing the intro backwards.
+                    animInstance.playSegments(sweetSpotFrame, true);
                 }
             });
         }
-
         // Attempt to load YOUR animation natively
         let lottieAnim = lottie.loadAnimation({
             container: lottieContainer,
